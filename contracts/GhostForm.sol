@@ -6,6 +6,7 @@ contract GhostForm {
         address user;
         uint256 expiryTime;
         bool used;
+        uint256 createdAt;
     }
 
     mapping(address => GhostWallet) public ghostWallets;
@@ -18,7 +19,12 @@ contract GhostForm {
         require(ghostWallets[msg.sender].user == address(0), "Already has a ghost wallet");
 
         uint256 expiry = block.timestamp + (lifespanInMinutes * 1 minutes);
-        ghostWallets[msg.sender] = GhostWallet(msg.sender, expiry, false);
+          ghostWallets[msg.sender] = GhostWallet({
+        user: msg.sender,
+        expiryTime: expiry,
+        used: false,
+        createdAt: block.timestamp
+    });
 
         emit GhostWalletCreated(msg.sender, expiry);
     }
@@ -33,6 +39,10 @@ contract GhostForm {
 
         emit MessagePosted(msg.sender, message);
     }
+    function getCreatedAt() external view returns (uint256) {
+        return ghostWallets[msg.sender].createdAt;
+    }
+
 
     function selfDestruct() external {
         GhostWallet storage gw = ghostWallets[msg.sender];
